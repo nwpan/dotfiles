@@ -1,0 +1,57 @@
+#!/bin/bash
+
+SESSION=$USER
+DB="mysql"
+
+# Neat KILL ALL TMUX SCREENS
+#tmux ls | awk '{print $1}' | sed 's/://g' | xargs -I{} tmux kill-session -t {}
+#alias kts='tx ls | awk '{print $1}' | sed 's/://g' | xargs -I{} tmux kill-session -t {}'
+
+# RAILS SETTINGS
+RAILS_PLAN_PATH="$HOME/plan"
+RAILS_CLIO_PATH="/media/truecrypt1"
+RAILS_SERVER="rails s"
+
+# DATABASE SETTINGS
+MYSQL_DEV_DB_LOGIN="mysql"
+
+# CLIO DATABASE SETTINGS
+CLIO_DEV_DB_LOGIN="mysql -u themis_dev -p themis_development"
+
+BASE=$RAILS_PLAN_PATH
+SERVER=$RAILS_SERVER
+DB_SERVER=$MYSQL_DEV_DB_LOGIN
+# if the session is already running, just attach to it.
+tmux has-session -t $SESSION
+if [ $? -eq 0 ]; then
+        echo "Session $SESSION already exists. Attaching."
+        sleep 1
+        tmux -2 attach -t $SESSION
+        exit 0;
+fi
+
+# create a new session, named $SESSION, and detach from it
+tmux -2 new-session -d -s $SESSION
+
+tmux new-window -t $SESSION -a -k -n vim
+tmux new-window -t $SESSION -a -k -n server
+tmux new-window -t $SESSION -a -k -n db
+tmux new-window -t $SESSION -a -k -n ssh_aws
+
+tmux send-keys -t $SESSION:vim "clear" C-m
+tmux send-keys -t $SESSION:server "clear" C-m
+tmux send-keys -t $SESSION:db "clear" C-m
+tmux send-keys -t $SESSION:ssh_aws "clear" C-m
+
+tmux send-keys -t $SESSION:vim  "cd $BASE" C-m
+tmux send-keys -t $SESSION:vim  "vim "
+tmux send-keys -t $SESSION:server "cd $BASE" C-m
+tmux send-keys -t $SESSION:server "$SERVER "
+tmux send-keys -t $SESSION:db "$DB_SERVER "
+tmux send-keys -t $SESSION:ssh_aws "ssh ubuntu@ec2-54-201-61-79.us-west-2.compute.amazonaws.com"
+
+# all done. select starting window and get to work
+# you may need to cycle through windows and type in passwords
+# if you don't use ssh keys
+tmux select-window -t $SESSION:0
+tmux -2 attach -t $SESSION
