@@ -16,6 +16,8 @@ Bundle 'kien/ctrlp.vim'
 Bundle 'rking/ag.vim'
 Bundle 'mattn/webapi-vim'
 Bundle 'mattn/gist-vim'
+Bundle 'Shougo/neocomplcache.vim'
+
 filetype plugin indent on     " required!
 
 set smartindent
@@ -38,6 +40,15 @@ colors grb256
 
 set gfn=Monospace\ Regular\ 11
 
+set number
+
 let g:gist_detect_filetype = 1
 let g:gist_open_browser_after_post = 1
 let g:gist_post_private = 1
+
+" neocomplcache settings
+let g:neocomplcache_dictionary_filetype_lists = {
+    \ 'default' : '',
+    \ 'vimshell' : $HOME.'/.vimshell_hist',
+    \ 'scheme' : $HOME.'/.gosh_completions'
+        \ }

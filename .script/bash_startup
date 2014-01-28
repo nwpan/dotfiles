@@ -10,17 +10,20 @@ DB="mysql"
 # RAILS SETTINGS
 RAILS_PLAN_PATH="$HOME/plan"
 RAILS_CLIO_PATH="/media/truecrypt1"
-RAILS_SERVER="rails s"
+RAILS_SERVER="rails s "
+RAILS_JOBS=""
 
 # DATABASE SETTINGS
 MYSQL_DEV_DB_LOGIN="mysql"
 
 # CLIO DATABASE SETTINGS
-CLIO_DEV_DB_LOGIN="mysql -u themis_dev -p themis_development"
+CLIO_DEV_DB_LOGIN=""
 
 BASE=$RAILS_PLAN_PATH
 SERVER=$RAILS_SERVER
+JOBS=$RAILS_JOBS
 DB_SERVER=$MYSQL_DEV_DB_LOGIN
+
 # if the session is already running, just attach to it.
 tmux has-session -t $SESSION
 if [ $? -eq 0 ]; then
@@ -33,22 +36,48 @@ fi
 # create a new session, named $SESSION, and detach from it
 tmux -2 new-session -d -s $SESSION
 
-tmux new-window -t $SESSION -a -k -n vim
+<<PERSONAL_DEV
+PERSONAL_DEV
 tmux new-window -t $SESSION -a -k -n server
 tmux new-window -t $SESSION -a -k -n db
-tmux new-window -t $SESSION -a -k -n ssh_aws
+#tmux new-window -t $SESSION -a -k -n ssh_aws
 
-tmux send-keys -t $SESSION:vim "clear" C-m
-tmux send-keys -t $SESSION:server "clear" C-m
+tmux split-window -t $SESSION:server
+tmux split-window -h -t $SESSION:server.1
+
+tmux send-keys -t $SESSION:server.0 "cd $BASE" C-m
+tmux send-keys -t $SESSION:server.0 "clear" C-m
+tmux send-keys -t $SESSION:server.0 "vim "
+tmux send-keys -t $SESSION:server.1 "cd $BASE" C-m
+tmux send-keys -t $SESSION:server.1 "clear" C-m
+tmux send-keys -t $SESSION:server.1 "$SERVER"
+tmux send-keys -t $SESSION:server.2 "cd $BASE" C-m
+tmux send-keys -t $SESSION:server.2 "clear" C-m
+tmux send-keys -t $SESSION:server.2 "$JOBS"
 tmux send-keys -t $SESSION:db "clear" C-m
-tmux send-keys -t $SESSION:ssh_aws "clear" C-m
-
-tmux send-keys -t $SESSION:vim  "cd $BASE" C-m
-tmux send-keys -t $SESSION:vim  "vim "
-tmux send-keys -t $SESSION:server "cd $BASE" C-m
-tmux send-keys -t $SESSION:server "$SERVER "
 tmux send-keys -t $SESSION:db "$DB_SERVER "
-tmux send-keys -t $SESSION:ssh_aws "ssh ubuntu@ec2-54-201-61-79.us-west-2.compute.amazonaws.com"
+#tmux send-keys -t $SESSION:ssh_aws "ssh ubuntu@ec2-54-201-61-79.us-west-2.compute.amazonaws.com"
+
+
+<<CMPT474
+
+tmux send-keys -t $SESSION "clear" C-m
+tmux send-keys -t $SESSION "curl -XPOST -F \"image=@./cmpt474_notes/blog_server.jpg\" localhost"
+tmux new-window -t $SESSION -a -k -n cmpt474
+tmux send-keys -t $SESSION:cmpt474  "cd $HOME/SFU/a2" C-m
+tmux send-keys -t $SESSION:cmpt474  "vim ./worker.py" C-m
+tmux send-keys -t $SESSION:cmpt474  ":set noexpandtab" C-m
+tmux send-keys -t $SESSION:cmpt474  ":vsp ./server.py" C-m
+tmux split-window -t $SESSION:cmpt474
+tmux send-keys -t $SESSION:cmpt474.1  "cd $HOME/SFU/a2/; clear" C-m
+tmux send-keys -t $SESSION:cmpt474.1  "clear" C-m
+tmux send-keys -t $SESSION:cmpt474.1  "sudo python ./server.py"
+tmux split-window -h -t $SESSION:cmpt474.1
+tmux send-keys -t $SESSION:cmpt474.2  "cd $HOME/SFU/a2/" C-m
+tmux send-keys -t $SESSION:cmpt474.2  "clear" C-m
+tmux send-keys -t $SESSION:cmpt474.2  "sudo python worker.py"
+#tmux send-keys -t $SESSION:cmpt474.2 "ssh ubuntu@ec2-54-201-61-79.us-west-2.compute.amazonaws.com"
+CMPT474
 
 # all done. select starting window and get to work
 # you may need to cycle through windows and type in passwords
